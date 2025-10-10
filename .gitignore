@@ -1,0 +1,9 @@
+*.o
+*.pas
+game
+client
+server
+!Client/
+!Server/
+.vscode/
+.DS_Store
