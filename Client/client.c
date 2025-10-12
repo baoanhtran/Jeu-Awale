@@ -5,26 +5,6 @@
 
 #include "client.h"
 
-static void init(void)
-{
-#ifdef WIN32
-    WSADATA wsa;
-    int err = WSAStartup(MAKEWORD(2, 2), &wsa);
-    if (err < 0)
-    {
-        puts("WSAStartup failed !");
-        exit(EXIT_FAILURE);
-    }
-#endif
-}
-
-static void end(void)
-{
-#ifdef WIN32
-    WSACleanup();
-#endif
-}
-
 static void app(const char *address, const char *name)
 {
     SOCKET sock = init_connection(address);
@@ -134,7 +114,7 @@ static int init_connection(const char *address)
         exit(EXIT_FAILURE);
     }
 
-    sin.sin_addr = *(IN_ADDR *)hostinfo->h_addr;
+    sin.sin_addr = *(IN_ADDR *)hostinfo->h_addr_list[0];
     sin.sin_port = htons(PORT);
     sin.sin_family = AF_INET;
 
@@ -181,11 +161,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    init();
-
     app(argv[1], argv[2]);
-
-    end();
 
     return EXIT_SUCCESS;
 }

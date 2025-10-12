@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "awale.h"
+#include "game_logic.h"
 
 // Copies the board of a partie into a buffer
 void getPlateau(char *buffer, Partie *partie, int view, const char *name_player_1, const char *name_player_2)
@@ -227,7 +227,7 @@ bool verifierPrises(Partie *partie, int position)
     }
 
     // Vérifie si contient 2 ou 3 graines
-    if (partie->plateau[position] <= 2 || partie->plateau[position] >= 3)
+    if (partie->plateau[position] < 2 || partie->plateau[position] > 3)
     {
         return false;
     }
@@ -250,6 +250,25 @@ void effectuerTour(Partie *partie, int case_jouee)
             (position + 1) % NB_CASES; // Passer à la case suivante, en boucle
         partie->plateau[position]++;
         graines--;
+    }
+
+    // Verifier la valeur de verifierPrises
+    printf("Valeur de verifierPrises pour la position %d : %s\n", position,
+           verifierPrises(partie, position) ? "true" : "false");
+    // Vérifier les prises possibles
+    while (verifierPrises(partie, position))
+    {
+        // Ajouter les graines prises au score du joueur actif
+        if (partie->tour_joueur1)
+        {
+            partie->score_joueur1 += partie->plateau[position];
+        }
+        else
+        {
+            partie->score_joueur2 += partie->plateau[position];
+        }
+        partie->plateau[position] = 0; // La case est maintenant vide
+        position = (position - 1 + NB_CASES) % NB_CASES; // Reculer à la case précédente
     }
 
     // Changer de joueur

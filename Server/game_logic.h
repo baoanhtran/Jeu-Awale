@@ -1,5 +1,5 @@
-#ifndef AWALE_H
-#define AWALE_H
+#ifndef GAME_LOGIC_H
+#define GAME_LOGIC_H
 
 #include <stdbool.h>
 #include <stdlib.h>

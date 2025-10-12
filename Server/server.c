@@ -208,26 +208,6 @@ static void command_not_found(Client sender, const char *command)
 //  						APPS
 // #########################################################
 
-static void init(void)
-{
-#ifdef WIN32
-    WSADATA wsa;
-    int err = WSAStartup(MAKEWORD(2, 2), &wsa);
-    if (err < 0)
-    {
-        puts("WSAStartup failed !");
-        exit(EXIT_FAILURE);
-    }
-#endif
-}
-
-static void end(void)
-{
-#ifdef WIN32
-    WSACleanup();
-#endif
-}
-
 static void app(void)
 {
     SOCKET sock = init_connection();
@@ -301,7 +281,7 @@ static void app(void)
         else if (FD_ISSET(sock, &rdfs))
         {
             SOCKADDR_IN csin = {0};
-            size_t sinsize = sizeof csin;
+            socklen_t sinsize = sizeof csin;
             int csock = accept(sock, (SOCKADDR *)&csin, &sinsize);
             if (csock == SOCKET_ERROR)
             {
@@ -699,8 +679,8 @@ static void send_connected_names(Client *connected_clients, SOCKET sock, int act
                 break;
             }
 
-            char info[NAME_SIZE + 10];
-            sprintf(info, "[%s] %s (score: %d)", status, c.name, c.elo_scores);
+            char info[NAME_SIZE + 32];
+            snprintf(info, sizeof(info), "[%s] %s (score: %d)", status, c.name, c.elo_scores);
             strcat(buffer, info);
             if (c.sock == sock)
             {
@@ -773,11 +753,7 @@ static void clear_challenge(Challenge *challenges, int nb_challenges)
 
 int main()
 {
-    init();
-
     app();
-
-    end();
 
     return EXIT_SUCCESS;
 }

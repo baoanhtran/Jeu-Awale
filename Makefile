@@ -3,11 +3,11 @@ ifeq ($(shell uname), Darwin)
     CLIENT_EXE = client.pas
 	SERVER_EXE = server.pas
 else
-    CLIENT_EXE = client
-	SERVER_EXE = server
+    CLIENT_EXE = awale_client
+	SERVER_EXE = awale_server
 endif
 
-OBJS = awale.o challenge.o game.o message.o utils.o user_interaction.o ranking.o persistence.o
+OBJS = challenge.o game.o game_logic.o message.o utils.o user_interaction.o ranking.o persistence.o
 
 all: client server
 
@@ -15,7 +15,10 @@ message.o: Server/message.c
 	gcc -c Server/message.c 
 
 game.o: Server/game.c
-	gcc -c Server/game.c 
+	gcc -c Server/game.c
+
+game_logic.o: Server/game_logic.c
+	gcc -c Server/game_logic.c
 
 challenge.o: Server/challenge.c
 	gcc -c Server/challenge.c 
@@ -31,9 +34,6 @@ ranking.o: Server/ranking.c
 
 persistence.o: Server/persistence.c
 	gcc -c Server/persistence.c
-
-awale.o: awale.c
-	gcc -c awale.c 
 
 client.o: Client/client.c
 	gcc -c Client/client.c 

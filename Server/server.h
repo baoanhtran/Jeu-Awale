@@ -1,18 +1,13 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#ifdef WIN32
-
-#include <winsock2.h>
-
-#elif defined(linux) || defined(__APPLE__) || defined(__MACH__) || defined(__LINUX__)
-
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h> /* close */
 #include <netdb.h>  /* gethostbyname */
+#include <sys/select.h> /* fd_set */
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR -1
 #define closesocket(s) close(s)
@@ -21,19 +16,13 @@ typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr SOCKADDR;
 typedef struct in_addr IN_ADDR;
 
-#else
-
-#error not defined for this platform
-
-#endif
-
 #include "persistence.h"
 #include "challenge.h"
 #include "game.h"
 #include "client.h"
 
 #define CRLF "\r\n"
-#define PORT 1977
+#define PORT 9998
 #define MAX_CLIENTS 100
 #define BUF_SIZE 2048
 
@@ -46,8 +35,6 @@ static void handle_commands(
 static void command_not_found(Client sender, const char *command); // handle case inputed command is not in list of commands
 
 // Apps
-static void init(void);
-static void end(void);
 static void app(void);
 
 // connections

@@ -1,9 +1,7 @@
 *.o
 *.pas
 game
-client
-server
-!Client/
-!Server/
+awale_client
+awale_server
 .vscode/
 .DS_Store

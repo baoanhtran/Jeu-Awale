@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "../awale.h"
+#include "game_logic.h"
 #include "client.h"
 
 #define MAX_OBSERVATORS 100
@@ -46,7 +46,6 @@ typedef struct
     GameState game_state;
 } Game;
 
-Game create_game(Client client_challenger, Client client_challenged, Game games[], int *games_nb); // TODO
 void delete_game(Game *games, int to_remove, int *nb_games);
 int has_game(Client client, const Game *games, int nb_games);
 void play(const char *cell_str, Client client, Game *games, int nb_games, Client *clients, int actual);

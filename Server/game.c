@@ -377,6 +377,7 @@ void kick_all_observators(Game *ptr_game)
 
     for (int i = 0; i < ptr_game->nb_observators; i++)
     {
+        write_client(ptr_game->ptr_observators[i]->sock, "The game is finished. You are now leaving the observation mode!");
         ptr_game->ptr_observators[i]->status = ONLINE;
     }
     free(ptr_game->ptr_observators);
@@ -454,6 +455,7 @@ static void end_paused_game(Client *clients, int actual, int ind_challenger, int
         clients[ind_challenged].status = ONLINE;
     }
     send_to_all_observators(games[game_idx], "The player took too much time to reconnect.\n");
+    kick_all_observators(&games[game_idx]);
     updateElo(&clients[ind_challenger], &clients[ind_challenged], WIN, K_COEF);
     delete_game(games, game_idx, nb_games);
 }
