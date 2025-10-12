@@ -9,12 +9,12 @@
 
 void addClient(Client client)
 {
-    // add a client to database
+    // ajoute un client à la base
 
     FILE *file = fopen(FILENAME, "ab");
     if (file == NULL)
     {
-        perror("Unable to open file");
+        perror("Impossible d'ouvrir le fichier");
         return;
     }
 
@@ -24,22 +24,22 @@ void addClient(Client client)
 
 void getClients(Client *clients, int *nb_clients)
 {
-    // read all clients from database
+    // lit tous les clients depuis la base
 
-    // open file
+    // ouvre le fichier
     FILE *file = fopen(FILENAME, "rb+");
     if (file == NULL)
     {
         if (fopen(FILENAME, "w") == NULL)
         {
-            perror("Unable to open file");
+            perror("Impossible d'ouvrir le fichier");
             return;
         };
         fclose(file);
         file = fopen(FILENAME, "rb+");
     }
 
-    // read clients from file and store them in clients[]
+    // lit les clients et les stocke dans clients[]
     int len = 0;
     while (!feof(file))
     {
@@ -54,57 +54,21 @@ void getClients(Client *clients, int *nb_clients)
     fclose(file);
 }
 
-void fetchClients(Client *clients, int *nb_clients)
-{
-    // Cause db doesnt store STATUS and SOCK, so call getClients in middle of server will be crashed, use this instead
-    // warning: cause this will  totally change the pointer and order of clients, so only use if you are sure that it will not affect the program
-
-    // open file
-    Client *_result = malloc(MAX_CLIENTS * sizeof(Client));
-    int *len;
-
-    // get clients from file, and update status and sock
-    getClients(_result, len);
-    for (int i = 0; i < *len; i++)
-    {
-        // update clients status and sock
-        for (int j = 0; j < *nb_clients; j++)
-        {
-            if (strcmp(_result[i].name, clients[j].name) == 0)
-            {
-                _result[i].status = clients[j].status;
-                _result[i].sock = clients[j].sock;
-                break;
-            }
-        }
-    }
-
-    // free old clients[]
-    free(clients);
-    for (int i = 0; i < *len; i++)
-    {
-        free_client(&clients[i]);
-    }
-
-    *nb_clients = *len;
-    clients = _result;
-}
-
 void updateClient(Client newClient)
 {
-    // update a client in database, client is identified by name
+    // met à jour un client dans la base, identifié par son nom
 
-    // open file
+    // ouvre le fichier
     FILE *file = fopen(FILENAME, "rb");
     FILE *tempFile = fopen("__temp.dat", "wb");
     if (file == NULL || tempFile == NULL)
     {
-        perror("Unable to open file");
+        perror("Impossible d'ouvrir le fichier");
         return;
     }
     const char *name = newClient.name;
 
-    // store all clients and newClient in tempFile
+    // stocke tous les clients et remplace par newClient si même nom
     while (!feof(file))
     {
         Client client;
@@ -125,25 +89,25 @@ void updateClient(Client newClient)
     fclose(file);
     fclose(tempFile);
 
-    // change tempFile back to original
+    // remplace le fichier original
     remove(FILENAME);
     rename("__temp.dat", FILENAME);
 }
 
 void deleteClient(const char *name)
 {
-    // delete a client from database, client is identified by name
+    // supprime un client dans la base, identifié par son nom
 
-    // open file
+    // ouvre le fichier
     FILE *file = fopen(FILENAME, "rb");
     FILE *tempFile = fopen("_temp.dat", "wb");
     if (file == NULL || tempFile == NULL)
     {
-        perror("Unable to open file");
+        perror("Impossible d'ouvrir le fichier");
         return;
     }
 
-    // store all clients except the one with name in tempFile
+    // stocke tous les clients sauf celui à supprimer
     while (1)
     {
         Client client;
@@ -158,14 +122,14 @@ void deleteClient(const char *name)
     fclose(file);
     fclose(tempFile);
 
-    // change tempFile back to original
+    // remplace le fichier original
     remove(FILENAME);
     rename("_temp.dat", FILENAME);
 }
 
 size_t fwrite_string(const char *str, FILE *file)
 {
-    // write string to file
+    // écrit une chaîne dans le fichier
 
     size_t len = strlen(str) + 1;
     fwrite(&len, sizeof(size_t), 1, file);
@@ -187,10 +151,8 @@ size_t fread_string(char *ptr_buffer, FILE *file)
 
 size_t file_write_client(const Client *client, FILE *file)
 {
-    // write a client to file
-
     size_t len = 0;
-    // No need to persist socket and status
+    // Pas besoin de persister socket et status
     len += fwrite(&client->nb_friend_req, sizeof(int), 1, file);
     len += fwrite(&client->elo_scores, sizeof(int), 1, file);
 
@@ -198,7 +160,7 @@ size_t file_write_client(const Client *client, FILE *file)
     len += fwrite_string(client->bio, file);
     len += fwrite_string(client->ip, file);
 
-    // write Friends Request of client
+    // écrit les Friends Request du client
     for (int i = 0; i < client->nb_friend_req; i++)
     {
         len += fwrite_string(client->friend_req[i].name_client, file);
@@ -210,11 +172,11 @@ size_t file_write_client(const Client *client, FILE *file)
 
 size_t file_read_client(Client *client, FILE *file)
 {
-    // read a client from file
+    // lit un client depuis le fichier
 
     size_t len = 0;
     size_t t;
-    // No need to persist socket and status
+    // Pas besoin de persister socket et status
     if ((t = fread(&client->nb_friend_req, sizeof(int), 1, file)) != 1)
     {
         return 0;
@@ -242,7 +204,7 @@ size_t file_read_client(Client *client, FILE *file)
     }
     len += t;
 
-    // read Friends Request of client
+    // lit les demandes d'ami du client
     client->friend_req = (Friend_Req *)malloc(MAX_FRIEND_REQ * sizeof(Friend_Req));
     for (int i = 0; i < client->nb_friend_req; i++)
     {

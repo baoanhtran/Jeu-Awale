@@ -50,19 +50,19 @@ int compare_ptr_clients(const void *a, const void *b)
 
 const char *get_rank(int elo)
 {
-    // get rank by elo score
+    // obtient le rang d'après le score ELO
 
     if (elo < BEGINNER_MAX)
     {
-        return "Beginner";
+        return "Débutant";
     }
     else if (elo < INTERMEDIATE_MAX)
     {
-        return "Intermediate";
+        return "Intermédiaire";
     }
     else if (elo < ADVANCED_MAX)
     {
-        return "Advanced";
+        return "Avancé";
     }
     else if (elo < EXPERT_MAX)
     {
@@ -70,29 +70,28 @@ const char *get_rank(int elo)
     }
     else
     {
-        return "Master";
+        return "Maître";
     }
 }
 
 void display_sorted_players(Client sender, Client *clients, int actual)
 {
-    // print list players in order elo scores in buffer
+    // affiche la liste des joueurs triés par ELO
 
     char buffer[BUF_SIZE];
 
-    Client **ptr_clients = malloc(actual * sizeof(Client *)); // we use list ptr_clients, order this instead, so it do not affect the origin list clients
+    Client **ptr_clients = malloc(actual * sizeof(Client *)); // on trie les pointeurs pour ne pas modifier la liste d'origine
 
-    // create array of indeces
+    // création du tableau de pointeurs
     for (int i = 0; i < actual; i++)
     {
         ptr_clients[i] = &clients[i];
     }
 
-    // sort the indices array base on client elo scores
+    // tri décroissant
     qsort(ptr_clients, actual, sizeof(Client *), compare_ptr_clients);
-    write_client(sender.sock, "123");
     // show list
-    sprintf(buffer, "Sorted rankings of all clients:\n");
+    sprintf(buffer, "Classement trié de tous les joueurs :\n");
     for (int i = 0; i < min(actual, LIMIT_RANK_LIST); i++)
     {
         Client *ptr = ptr_clients[i];
@@ -101,7 +100,7 @@ void display_sorted_players(Client sender, Client *clients, int actual)
 
         char info[BUF_SIZE];
         sprintf(info,
-                "%d. [%s] %s - score: %d\n",
+                "%d. [%s] %s - score : %d\n",
                 i + 1, rank, ptr->name, ptr->elo_scores);
         strcat(buffer, info);
     }

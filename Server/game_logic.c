@@ -2,10 +2,10 @@
 #include <string.h>
 #include "game_logic.h"
 
-// Copies the board of a partie into a buffer
+// Copie le plateau d'une partie dans un buffer
 void getPlateau(char *buffer, Partie *partie, int view, const char *name_player_1, const char *name_player_2)
 {
-    // print plateau of game to buffer, view = 1 or 2 is for player 1 or 2, the rest number is for observators
+    // affiche le plateau dans buffer, view = 1 ou 2 pour les joueurs, autre pour observateurs
 
     // Temporary buffer to construct the output
     int buffer_size = BUF_SIZE;
@@ -82,7 +82,7 @@ void getPlateau(char *buffer, Partie *partie, int view, const char *name_player_
     strncat(buffer, "=========================\n\n", BUF_SIZE - strlen(buffer) - 1);
 }
 
-// Print the board of a partie in stdout (test purpose)
+// Imprime le plateau d'une partie dans stdout (usage de test)
 void afficherPlateau(Partie *partie)
 {
     printf("\n=========================");
@@ -103,7 +103,7 @@ void afficherPlateau(Partie *partie)
     printf("=========================\n\n");
 }
 
-// Creates and initialize a Partie
+// Crée et initialise une Partie
 Partie *creerPartie()
 {
     Partie *nouvelle_partie = (Partie *)malloc(sizeof(Partie));
@@ -122,7 +122,7 @@ Partie *creerPartie()
     nouvelle_partie->score_joueur1 = 0;
     nouvelle_partie->score_joueur2 = 0;
 
-    nouvelle_partie->tour_joueur1 = rand() % 2; // Random starting player
+    nouvelle_partie->tour_joueur1 = rand() % 2; // joueur de départ aléatoire
 
     return nouvelle_partie;
 }
@@ -147,13 +147,13 @@ bool finDePartie(Partie *partie)
         }
     }
 
-    // Cas 1 : Le plateau est trop peu pour jouer
+    // Cas 1 : le plateau contient trop peu de graines pour continuer
     if (graines_total <= 3)
     {
         return true;
     }
 
-    // Cas 2 : Un joueur n’a plus de graines dans ses cases
+    // Cas 2 : un joueur n'a plus de graines dans ses cases
     if ((partie->tour_joueur1 && graines_joueur1 == 0) || (!partie->tour_joueur1 && graines_joueur2 == 0))
     {
         return true;
@@ -267,7 +267,7 @@ void effectuerTour(Partie *partie, int case_jouee)
         {
             partie->score_joueur2 += partie->plateau[position];
         }
-        partie->plateau[position] = 0; // La case est maintenant vide
+        partie->plateau[position] = 0;                   // La case est maintenant vide
         position = (position - 1 + NB_CASES) % NB_CASES; // Reculer à la case précédente
     }
 
@@ -275,7 +275,7 @@ void effectuerTour(Partie *partie, int case_jouee)
     partie->tour_joueur1 = !partie->tour_joueur1;
 }
 
-// Saves a game
+// Sauvegarde une partie
 void sauvegarderPartie(Partie *partie, const char *nom_fichier)
 {
     FILE *fichier = fopen(nom_fichier, "w");
@@ -302,7 +302,7 @@ void sauvegarderPartie(Partie *partie, const char *nom_fichier)
     printf("Partie sauvegardée avec succès dans '%s'.\n", nom_fichier);
 }
 
-// Loads a game
+// Charge une partie
 Partie *chargerPartie(const char *nom_fichier)
 {
     FILE *fichier = fopen(nom_fichier, "r");

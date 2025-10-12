@@ -8,30 +8,30 @@ char buffer[BUF_SIZE];
 
 void send_menu_commands(SOCKET sock)
 {
-    // show all commands of game to a client
+    // affiche toutes les commandes du jeu à un client
     write_client(
         sock,
-        "List of commands:\n"
-        "  - menu: see all commands.\n"
-        "  - names: see all connected clients and their status.\n"
-        "  - rank: display top 50 players.\n"
-        "  - challenge [pseudo]: challenge a client for a game. Play with commands:\n"
-        "       + play [cell_number]: Move seeds in cell_number.\n"
-        "  - games: see all games in progress.\n"
-        "  - set visibility [private/public]: set visibility of playing game.\n"
-        "  - observe [pseudo]: participate the game of a user as an observator.\n"
-        "  - leave: leave observing mode.\n"
-        "  - chat [pseudo] [message]: send message to a client.\n"
-        "  - set bio [description]: set description of your bio.\n"
-        "  - bio [pseudo]: see bio of a client.\n"
-        "  - clear: clear terminal.\n"
-        "  - make friend [pseudo]: send a friend request to a client.\n"
-        "       + accept fr [pseudo]: accept friend request of someone.\n"
-        "       + deny fr [pseudo]: deny friend request of someone.\n"
-        "       + cancel fr [pseudo]: cancel your friend request to someone.\n"
-        "  - unfriend [pseudo]: unfriend with pseudo.\n"
-        "  - friends: show list of my friends.\n"
-        "  - friend requests: show list of my friend requests.\n");
+        "Liste des commandes :\n"
+        "  - menu : voir toutes les commandes.\n"
+        "  - names : voir tous les clients connectés et leur statut.\n"
+        "  - rank : afficher le top 50 des joueurs.\n"
+        "  - challenge [pseudo] : défier un client. Jouer avec les commandes :\n"
+        "       + play [numéro_case] : jouer depuis la case numéro.\n"
+        "  - games : voir toutes les parties en cours.\n"
+        "  - set visibility [private/public] : définir la visibilité de la partie en cours.\n"
+        "  - observe [pseudo] : participer à la partie d'un utilisateur en tant qu'observateur.\n"
+        "  - leave : quitter le mode observation.\n"
+        "  - chat [pseudo] [message] : envoyer un message privé à un client.\n"
+        "  - set bio [description] : définir votre biographie.\n"
+        "  - bio [pseudo] : voir la biographie d'un client.\n"
+        "  - clear : nettoyer le terminal.\n"
+        "  - make friend [pseudo] : envoyer une demande d'ami.\n"
+        "       + accept fr [pseudo] : accepter une demande d'ami.\n"
+        "       + deny fr [pseudo] : refuser une demande d'ami.\n"
+        "       + cancel fr [pseudo] : annuler une demande d'ami envoyée.\n"
+        "  - unfriend [pseudo] : supprimer un ami.\n"
+        "  - friends : afficher la liste de mes amis.\n"
+        "  - friend requests : afficher mes demandes d'ami en attente.\n");
 }
 
 void send_challenge_message(Client challenger, Client challenged)
@@ -39,20 +39,20 @@ void send_challenge_message(Client challenger, Client challenged)
     switch (challenged.status)
     {
     case OFFLINE:
-        write_client(challenger.sock, "This client is offline.");
+        write_client(challenger.sock, "Ce client est hors ligne.");
         break;
     case IN_GAME:
-        write_client(challenger.sock, "This client is already in game.");
+        write_client(challenger.sock, "Ce client est déjà en partie.");
         break;
     case OBSERVING:
-        write_client(challenger.sock, "This client is watching a game.");
+        write_client(challenger.sock, "Ce client regarde actuellement une partie.");
         break;
     case ONLINE:
         strncpy(buffer, challenger.name, BUF_SIZE - 1);
-        strncat(buffer, " has challenged you. [accept/deny]",
+        strncat(buffer, " vous a défié. [accept/deny]",
                 BUF_SIZE - strlen(buffer) - 1);
         write_client(challenged.sock, buffer);
-        write_client(challenger.sock, "Challenge request sent.");
+        write_client(challenger.sock, "Demande de défi envoyée.");
         break;
     }
 }
@@ -60,33 +60,32 @@ void send_challenge_message(Client challenger, Client challenged)
 void send_received_challenge(Challenge challenge)
 {
     strncpy(buffer, challenge.challenger.name, BUF_SIZE - 1);
-    strncat(buffer, " has already sent you a challenge request. [accept/deny] it before challenging someone else.", BUF_SIZE - strlen(buffer) - 1);
+    strncat(buffer, " vous a déjà envoyé une demande de défi. [accept/deny] avant d'en envoyer un autre.", BUF_SIZE - strlen(buffer) - 1);
     write_client(challenge.challenged.sock, buffer);
 }
 
 void send_challenge_accepted_message(Challenge challenge)
 {
     strncpy(buffer, challenge.challenged.name, BUF_SIZE - 1);
-    strncat(buffer, " has accepted the challenge. Joining the game...",
+    strncat(buffer, " a accepté le défi. Rejoindre la partie...",
             BUF_SIZE - strlen(buffer) - 1);
     write_client(challenge.challenger.sock, buffer);
-    strncpy(buffer, "Challenge accepted. Joining the game...", BUF_SIZE - 1);
+    strncpy(buffer, "Défi accepté. Rejoindre la partie...", BUF_SIZE - 1);
     write_client(challenge.challenged.sock, buffer);
 }
 
 void send_challenge_denied_message(Challenge challenge)
 {
     strncpy(buffer, challenge.challenged.name, BUF_SIZE - 1);
-    strncat(buffer, " has denied the challenge.",
+    strncat(buffer, " a refusé le défi.",
             BUF_SIZE - strlen(buffer) - 1);
     write_client(challenge.challenger.sock, buffer);
-    write_client(challenge.challenged.sock, "Challenge denied.");
+    write_client(challenge.challenged.sock, "Défi refusé.");
 }
 
 void send_to_all_observators(Game game, const char *buffer)
 {
-    // Send msg in buffer to all observators in game
-
+    // envoie buffer à tous les observateurs de la partie
     for (int i = 0; i < game.nb_observators; i++)
     {
         Client obs = *(game.ptr_observators[i]);
@@ -99,26 +98,26 @@ void send_to_all_observators(Game game, const char *buffer)
 
 void send_msg_friend_request(Client sender, Client requested)
 {
-    // Send content of friend request to sender and client
-    fwrite_client(sender.sock, "Friend request send!");
+    // envoie le contenu d'une demande d'ami au sender et au requested
+    fwrite_client(sender.sock, "Demande d'ami envoyée !");
     if (requested.status != OFFLINE)
     {
-        fwrite_client(requested.sock, "%s sent you a friend request! [accept fr %s / deny fr %s ]? You can ignore this and accept later.", sender.name, sender.name, sender.name);
+        fwrite_client(requested.sock, "%s vous a envoyé une demande d'ami ! [accept fr %s / deny fr %s] Vous pouvez l'ignorer et accepter plus tard.", sender.name, sender.name, sender.name);
     }
 }
 
 void send_list_friend_request(Client sender)
 {
-    // send list of friend request to sender
+    // envoie la liste des demandes d'ami au sender
 
-    // check if sender has any friend request
+    // vérifie si le sender a des demandes
     if (sender.nb_friend_req == 0)
     {
-        write_client(sender.sock, "You dont have any friend request yet!");
+        write_client(sender.sock, "Vous n'avez aucune demande d'ami pour l'instant !");
         return;
     }
 
-    // count friend req not deleted
+    // compte les demandes non supprimées
     int count = 0;
     for (int i = 0; i < sender.nb_friend_req; i++)
     {
@@ -130,37 +129,37 @@ void send_list_friend_request(Client sender)
 
     if (count == 0)
     {
-        write_client(sender.sock, "You dont have any friend request yet!");
+        write_client(sender.sock, "Vous n'avez aucune demande d'ami pour l'instant !");
         return;
     }
 
-    // send list of friend requests
+    // envoie la liste
     char buffer[BUF_SIZE];
-    sprintf(buffer, "You have %d friend requests: \n", count);
+    sprintf(buffer, "Vous avez %d demandes d'ami : \n", count);
     for (int i = 0; i < sender.nb_friend_req; i++)
     {
         Friend_Req fr = sender.friend_req[i];
 
-        // convert enum to string
-        char status[10];
+        // convertit l'enum en chaîne
+        char status[11];
         switch (fr.status)
         {
         case ACCEPTED:
-            strcpy(status, "ACCEPTED");
+            strcpy(status, "ACCEPTÉ");
             break;
         case DENIED:
-            strcpy(status, "DENIED");
+            strcpy(status, "REFUSÉ");
             break;
         case PENDING:
-            strcpy(status, "PENDING");
+            strcpy(status, "EN ATTENTE");
             break;
         default:
-            strcpy(status, "DELETED");
+            strcpy(status, "SUPPRIMÉ");
             break;
         }
         char info[BUF_SIZE];
         if (fr.status != DELETED)
-        { // do not send deleted friend requests
+        { // ne pas afficher les demandes supprimées
             sprintf(info,
                     "  - %s [%s]\n",
                     fr.name_client, status);
@@ -172,16 +171,16 @@ void send_list_friend_request(Client sender)
 
 void send_list_friend(Client sender, Client clients[], int actual)
 {
-    // send list of friend of sender to sender
+    // envoie la liste d'amis du sender
 
-    // check if sender has friend or not
+    // vérifie si le sender a des amis
     if (sender.nb_friend_req == 0)
     {
-        write_client(sender.sock, "You dont have any friend yet. Let make friend!");
+        write_client(sender.sock, "Vous n'avez pas encore d'amis. Envoyez une demande !");
         return;
     }
 
-    // count friends
+    // compte les amis
     int count = 0;
     for (int i = 0; i < sender.nb_friend_req; i++)
     {
@@ -193,37 +192,37 @@ void send_list_friend(Client sender, Client clients[], int actual)
 
     if (count == 0)
     {
-        write_client(sender.sock, "You dont have any friend yet. Let make friend!");
+        write_client(sender.sock, "Vous n'avez pas encore d'amis. Envoyez une demande !");
         return;
     }
 
-    // send list of friends
+    // envoie la liste
     char buffer[BUF_SIZE];
-    sprintf(buffer, "You have %d fiends: \n", count);
+    sprintf(buffer, "Vous avez %d amis : \n", count);
 
     for (int i = 0; i < sender.nb_friend_req; i++)
     {
         Friend_Req fr = sender.friend_req[i];
         int ind_client = name_exists(clients, actual, fr.name_client);
 
-        // convert emnum to string
+        // convertit l'enum en chaîne
         char info[BUF_SIZE];
         if (fr.status == ACCEPTED)
         {
-            char status[10];
+            char status[11];
             switch (clients[ind_client].status)
             {
             case ONLINE:
-                strcpy(status, "ONLINE");
+                strcpy(status, "EN LIGNE");
                 break;
             case OFFLINE:
-                strcpy(status, "OFFLINE");
+                strcpy(status, "HORS LIGNE");
                 break;
             case OBSERVING:
-                strcpy(status, "OBSERVING");
+                strcpy(status, "OBSERVANT");
                 break;
             case IN_GAME:
-                strcpy(status, "IN_GAME");
+                strcpy(status, "EN PARTIE");
                 break;
             }
 

@@ -22,7 +22,7 @@
 #define MAX_GAMES MAX_CLIENTS / 2
 
 // #########################################################
-//  						COMMANDS
+//  						COMMANDES
 // #########################################################
 
 static void handle_commands(
@@ -31,10 +31,10 @@ static void handle_commands(
     Challenge *pending_challenges, int *pending_challenges_nb,
     Game *games, int *games_nb)
 {
-    // handle command inputed of client
+    // gérer la commande saisie par le client
     bool print_separator = true;
 
-    //====================== BASE CMDS ============================
+    //====================== COMMANDES DE BASE ============================
 
     if (strcmp(command, "names") == 0)
     {
@@ -48,13 +48,13 @@ static void handle_commands(
     {
         display_sorted_players(clients[id_sender], clients, actual);
 
-        //====================== FRIEND CMDS ============================
+        //====================== COMMANDES D'AMITIÉ ============================
     }
     else if (strncmp(command, "make friend ", 12) == 0)
     {
         const char *name = command + 12;
         const int ind_requested = make_friend(clients, actual, id_sender, name);
-        // persistence client for friend request
+        // persistance du client pour la demande d'ami
         if (ind_requested != -1)
         {
             updateClient(clients[ind_requested]);
@@ -65,7 +65,7 @@ static void handle_commands(
     {
         const char *name = command + 10;
         const int ind_fr_sender = accept_friend_req(clients[id_sender], name, clients, actual);
-        // persistence client for friend request
+        // persistance du client pour la demande d'ami
         if (ind_fr_sender != -1)
         {
             updateClient(clients[ind_fr_sender]);
@@ -76,7 +76,7 @@ static void handle_commands(
     {
         const char *name = command + 8;
         const int ind_fr_sender = deny_friend_request(clients[id_sender], name, clients, actual);
-        // persistence client for friend request
+        // persistance du client pour la demande d'ami
         if (ind_fr_sender != -1)
         {
             updateClient(clients[ind_fr_sender]);
@@ -87,7 +87,7 @@ static void handle_commands(
     {
         const char *name = command + 10;
         const int ind_requested = cancel_friend_request(clients[id_sender], name, clients, actual);
-        // persistence client for friend request
+        // persistance du client pour la demande d'ami
         if (ind_requested != -1)
         {
             updateClient(clients[ind_requested]);
@@ -98,7 +98,7 @@ static void handle_commands(
     {
         const char *name = command + 9;
         const int ind_opponent = unfriend(clients[id_sender], name, clients, actual);
-        // persistence client for friend request
+        // persistance du client pour la suppression d'ami
         if (ind_opponent != -1)
         {
             updateClient(clients[ind_opponent]);
@@ -113,7 +113,7 @@ static void handle_commands(
     {
         send_list_friend_request(clients[id_sender]);
 
-        //====================== CHALLENGE CMDS ============================
+        //====================== COMMANDES DE DÉFI ============================
     }
     else if (strncmp(command, "challenge ", 10) == 0)
     {
@@ -133,7 +133,7 @@ static void handle_commands(
         deny_challenge(clients, id_sender, pending_challenges,
                        pending_challenges_nb);
 
-        //====================== GAMES CMDS ============================
+        //====================== COMMANDES DE PARTIE ============================
     }
     else if (strncmp(command, "play ", 5) == 0)
     {
@@ -163,7 +163,7 @@ static void handle_commands(
     {
         leave_observing(&clients[id_sender], games, *games_nb);
 
-        //====================== CHATTING - BIO CMDS ============================
+        //====================== MESSAGES - BIO ============================
     }
     else if (strncmp(command, "chat", 4) == 0)
     {
@@ -181,7 +181,7 @@ static void handle_commands(
         const char *name = command + 4;
         show_bio(clients, actual, clients[id_sender], name);
 
-        //====================== ANOTHER CMDS ============================
+        //====================== AUTRES COMMANDES ============================
     }
     else
     {
@@ -196,16 +196,16 @@ static void handle_commands(
 
 static void command_not_found(Client sender, const char *command)
 {
-    // handle case inputed command is not in list of commands
+    // gérer le cas où la commande n'existe pas
 
     fwrite_client(sender.sock,
-                  "'%s' command not found!\n",
+                  "'%s' : commande introuvable !\n",
                   command);
     send_menu_commands(sender.sock);
 }
 
 // #########################################################
-//  						APPS
+//  						APPLICATION
 // #########################################################
 
 static void app(void)
@@ -213,23 +213,23 @@ static void app(void)
     SOCKET sock = init_connection();
     char buffer[BUF_SIZE];
 
-    /* an array for all clients */
+    /* un tableau pour tous les clients */
     int actual = 0;
     int max = sock;
     Client *clients = malloc(MAX_CLIENTS * sizeof(Client));
-    /* persistence of clients */
+    /* persistance des clients */
     getClients(clients, &actual);
 
     int pending_challenges_nb = 0;
     Challenge pending_challenges[MAX_PENDING_CHALLENGES];
 
-    // an array for games */
+    /* un tableau pour les parties */
     int games_nb = 0;
     Game games[MAX_GAMES];
 
     fd_set rdfs;
 
-    struct timeval timeout; // for refreshing the server
+    struct timeval timeout; // pour rafraîchir le serveur
 
     time_t last_refresh = time(NULL);
     while (1)
@@ -237,13 +237,13 @@ static void app(void)
         int i = 0;
         FD_ZERO(&rdfs);
 
-        /* add STDIN_FILENO */
+        /* ajouter STDIN_FILENO */
         FD_SET(STDIN_FILENO, &rdfs);
 
-        /* add the connection socket */
+        /* ajouter le socket de connexion */
         FD_SET(sock, &rdfs);
 
-        /* add socket of each client */
+        /* ajouter le socket de chaque client */
         for (i = 0; i < actual; i++)
         {
             if (clients[i].status != OFFLINE)
@@ -252,12 +252,12 @@ static void app(void)
             }
         }
 
-        timeout.tv_sec = 1; // refreshing each second
+        timeout.tv_sec = 1; // rafraîchissement chaque seconde
         timeout.tv_usec = 0;
 
         int activity = select(max + 1, &rdfs, NULL, NULL, &timeout);
 
-        // Each second, refresh the challenges and games
+        // Chaque seconde, rafraîchir les défis et les parties
         if (activity == 0)
         {
             refresh_challenges(pending_challenges, &pending_challenges_nb);
@@ -272,10 +272,10 @@ static void app(void)
             exit(errno);
         }
 
-        /* something from standard input : i.e keyboard */
+        /* quelque chose depuis l'entrée standard : par ex. le clavier */
         if (FD_ISSET(STDIN_FILENO, &rdfs))
         {
-            /* stop process when type on keyboard */
+            /* arrêter le processus lorsqu'on tape au clavier */
             break;
         }
         else if (FD_ISSET(sock, &rdfs))
@@ -289,14 +289,14 @@ static void app(void)
                 continue;
             }
 
-            /* after connecting the client sends its name */
+            /* après connexion le client envoie son nom */
             if (read_client(csock, buffer) == -1)
             {
-                /* disconnected */
+                /* déconnecté */
                 continue;
             }
 
-            // get the client ip address
+            // obtenir l'adresse IP du client
             char client_ip[INET_ADDRSTRLEN];
             inet_ntop(AF_INET, &csin.sin_addr, client_ip, sizeof(client_ip));
             connect_client(clients, &actual, csock, &max, &rdfs, client_ip, buffer, games, games_nb);
@@ -306,12 +306,12 @@ static void app(void)
             int i = 0;
             for (i = 0; i < actual; i++)
             {
-                // a client is talking
+                // un client parle
                 if (FD_ISSET(clients[i].sock, &rdfs) && clients[i].status != OFFLINE)
                 {
                     Client client = clients[i];
                     int c = read_client(clients[i].sock, buffer);
-                    // if the client is disconnected we disconnect him cleanly and cancel his (maybe) pending challenge
+                    // si le client est déconnecté on le déconnecte proprement et on annule son éventuel défi en attente
                     if (c == 0)
                     {
                         disconnect_client(clients, i, actual, games, &games_nb);
@@ -340,7 +340,7 @@ static void app(void)
 }
 
 // #########################################################
-//  						Connections
+//  						CONNEXIONS
 // #########################################################
 
 static int init_connection(void)
@@ -375,14 +375,14 @@ static int init_connection(void)
 
 static void end_connection(int sock) { closesocket(sock); }
 
-// Create a client (triggered the first time a client gets connected)
+// Créer un client (déclenché la première fois qu'un client se connecte)
 static void create_client(Client *clients, int *actual, int csock, int *max, fd_set *rdfs, const char *client_ip, const char *name)
 {
     init_client(&clients[*actual], csock, client_ip, name);
-    // persistence new client
+    // persistance du nouveau client
     addClient(clients[*actual]);
 
-    fwrite_client(csock, "Welcome to AWALE game! Have a good time here with us!\n");
+    fwrite_client(csock, "Bienvenue au jeu AWALE ! Amusez-vous bien ici avec nous !\n");
     send_menu_commands(csock);
     *max = csock > *max ? csock : *max;
     (*actual)++;
@@ -391,22 +391,22 @@ static void create_client(Client *clients, int *actual, int csock, int *max, fd_
 
 static void disconnect_client(Client *clients, int to_remove, int actual, Game *games, int *nb_games)
 {
-    // Update status, socket and close the socket
+    // mettre à jour le statut, le socket et fermer le socket
     closesocket(clients[to_remove].sock);
     clients[to_remove].status = OFFLINE;
     clients[to_remove].sock = -1;
     int client_in_game = is_in_game(games, *nb_games, clients[to_remove]);
-    // The client is in game ?
+    // Le client est-il en jeu ?
     if (client_in_game != -1)
     {
-        // We notify his opponent and the observators
+        // Nous notifions son adversaire et les observateurs
         char buffer[BUF_SIZE];
         strcpy(buffer, clients[to_remove].name);
-        strncat(buffer, " has disconnected.\n\n", BUF_SIZE - strlen(buffer) - 1);
-        send_to_all_observators(games[client_in_game], buffer); // notifies all the observators
+        strncat(buffer, " s'est déconnecté.\n\n", BUF_SIZE - strlen(buffer) - 1);
+        send_to_all_observators(games[client_in_game], buffer); // notifie tous les observateurs
 
         bool challenged_is_disconnected = strcmp(games[client_in_game].client_challenged.name, clients[to_remove].name) == 0;
-        // Also update the copy of the (disconnected) client in the games array
+        // Mettre aussi à jour la copie du client (déconnecté) dans le tableau des parties
         if (challenged_is_disconnected)
         {
             games[client_in_game].client_challenged.status = OFFLINE;
@@ -416,39 +416,39 @@ static void disconnect_client(Client *clients, int to_remove, int actual, Game *
             games[client_in_game].client_challenger.status = OFFLINE;
         }
 
-        // Both clients are disconnected : we end the game
+        // Les deux clients sont déconnectés : on termine la partie
         if (games[client_in_game].client_challenger.status == OFFLINE && games[client_in_game].client_challenged.status == OFFLINE)
         {
-            send_to_all_observators(games[client_in_game], "Both players are now disconnected. The game is canceled."); // notifies all the observators
+            send_to_all_observators(games[client_in_game], "Les deux joueurs sont maintenant déconnectés. La partie est annulée."); // notifie tous les observateurs
             delete_game(games, client_in_game, nb_games);
             return;
         }
 
-        // Set the game in a PAUSED state
+        // Mettre la partie en état PAUSED
         games[client_in_game].game_state = PAUSED;
         int ind_challenger = name_exists(clients, actual, games[client_in_game].client_challenger.name);
         int ind_challenged = name_exists(clients, actual, games[client_in_game].client_challenged.name);
-        // challenged client has disconnected
+        // le joueur challengé s'est déconnecté
         if (challenged_is_disconnected)
         {
-            // we update his number of disconnections and timestamp
+            // on met à jour son nombre de déconnexions et le timestamp
             games[client_in_game].game_disconnection->challenged_disconnections++;
             games[client_in_game].game_disconnection->elapsed_time = time(NULL);
-            // if the disconnected client has disconnected too many times, we end the game
+            // si le client déconnecté s'est déconnecté trop de fois, on termine la partie
             if (games[client_in_game].game_disconnection->challenged_disconnections > MAX_DISCONNECTION)
             {
                 strcpy(buffer, games[client_in_game].client_challenged.name);
-                strncat(buffer, " has disconnected too many time. ", BUF_SIZE - strlen(buffer) - 1);
+                strncat(buffer, " s'est déconnecté trop de fois. ", BUF_SIZE - strlen(buffer) - 1);
                 write_client(games[client_in_game].client_challenger.sock, buffer);
-                write_client(games[client_in_game].client_challenger.sock, "You win.");
+                write_client(games[client_in_game].client_challenger.sock, "Vous gagnez.");
                 strncat(buffer, games[client_in_game].client_challenger.name, BUF_SIZE - strlen(buffer) - 1);
-                strncat(buffer, " wins.\nYou are now leaving the observation mode!\n", BUF_SIZE - strlen(buffer) - 1);
+                strncat(buffer, " gagne.\nVous quittez maintenant le mode observation!\n", BUF_SIZE - strlen(buffer) - 1);
                 send_to_all_observators(games[client_in_game], buffer);
 
                 games[client_in_game].client_challenger.status = ONLINE;
                 clients[ind_challenger].status = ONLINE;
                 updateElo(&clients[ind_challenger], &clients[ind_challenged], WIN, K_COEF);
-                // persistence client for new ELO score
+                // persistance du client pour le nouveau score ELO
                 updateClient(clients[ind_challenger]);
                 updateClient(clients[ind_challenged]);
 
@@ -458,30 +458,30 @@ static void disconnect_client(Client *clients, int to_remove, int actual, Game *
             }
             else
             {
-                // we notify his opponent to wait until he is declared winner
+                // on notifie son adversaire d'attendre jusqu'à ce qu'il soit déclaré vainqueur
                 write_client(games[client_in_game].client_challenger.sock, buffer);
-                write_client(games[client_in_game].client_challenger.sock, "If your opponent doesn't reconnect in few seconds, you'll be declared the winner.");
+                write_client(games[client_in_game].client_challenger.sock, "Si votre adversaire ne se reconnecte pas dans quelques secondes, vous serez déclaré gagnant.");
             }
         }
         else
         {
-            // challenger has disconnected
+            // le challenger s'est déconnecté
             games[client_in_game].game_disconnection->challenger_disconnections++;
             games[client_in_game].game_disconnection->elapsed_time = time(NULL);
             if (games[client_in_game].game_disconnection->challenger_disconnections > MAX_DISCONNECTION)
             {
                 strcpy(buffer, games[client_in_game].client_challenger.name);
-                strncat(buffer, " has disconnected too many time. ", BUF_SIZE - strlen(buffer) - 1);
+                strncat(buffer, " s'est déconnecté trop de fois. ", BUF_SIZE - strlen(buffer) - 1);
                 write_client(games[client_in_game].client_challenged.sock, buffer);
-                write_client(games[client_in_game].client_challenged.sock, "You win.");
+                write_client(games[client_in_game].client_challenged.sock, "Vous gagnez.");
                 strncat(buffer, games[client_in_game].client_challenged.name, BUF_SIZE - strlen(buffer) - 1);
-                strncat(buffer, " wins.\nYou are now leaving the observation mode!\n", BUF_SIZE - strlen(buffer) - 1);
+                strncat(buffer, " gagne.\nVous quittez maintenant le mode observation!\n", BUF_SIZE - strlen(buffer) - 1);
                 send_to_all_observators(games[client_in_game], buffer);
 
                 games[client_in_game].client_challenged.status = ONLINE;
                 clients[name_exists(clients, actual, games[client_in_game].client_challenged.name)].status = ONLINE;
                 updateElo(&clients[ind_challenger], &clients[ind_challenged], LOSE, K_COEF);
-                // persistence client for new ELO score
+                // persistance du client pour le nouveau score ELO
                 updateClient(clients[ind_challenger]);
                 updateClient(clients[ind_challenged]);
 
@@ -493,7 +493,7 @@ static void disconnect_client(Client *clients, int to_remove, int actual, Game *
             else
             {
                 write_client(games[client_in_game].client_challenged.sock, buffer);
-                write_client(games[client_in_game].client_challenged.sock, "If your opponent doesn't reconnect in few seconds, you'll be declared the winner.");
+                write_client(games[client_in_game].client_challenged.sock, "Si votre adversaire ne se reconnecte pas dans quelques secondes, vous serez déclaré gagnant.");
             }
         }
     }
@@ -502,27 +502,27 @@ static void disconnect_client(Client *clients, int to_remove, int actual, Game *
 static void connect_client(Client *clients, int *actual, int csock, int *max, fd_set *rdfs, const char *client_ip, const char *name, Game *games, int nb_games)
 {
     int client_idx = name_exists(clients, *actual, name);
-    // Does the name exist ?
+    // Le pseudo existe ?
     if (client_idx != -1)
     {
         Client client = clients[client_idx];
-        // Is the client wanting to connect with a name really owns the name ??
+        // Le client voulant se connecter possède-t-il réellement ce pseudo ?
         if (strcmp(client.ip, client_ip) == 0)
         {
             if (client.status != OFFLINE)
             {
-                // host already connected with this name
-                write_client(csock, "already connected");
-                // The client will close the socket by himself. Once he did it, we'll detect and delete it in app().
+                // hôte déjà connecté avec ce pseudo
+                write_client(csock, "déjà connecté");
+                // Le client fermera le socket de son côté. Nous le détecterons ensuite dans app().
             }
             else
             {
-                // connects the client
+                // reconnecte le client
                 clients[client_idx].sock = csock;
                 FD_SET(csock, rdfs);
                 *max = csock > *max ? csock : *max;
                 int client_in_game = is_in_game(games, nb_games, clients[client_idx]);
-                // If the client were in game, we reconnect him
+                // Si le client était en jeu, on le reconnecte
                 if (client_in_game != -1)
                 {
                     clients[client_idx].status = IN_GAME;
@@ -531,20 +531,20 @@ static void connect_client(Client *clients, int *actual, int csock, int *max, fd
                 else
                 {
                     clients[client_idx].status = ONLINE;
-                    fwrite_client(csock, "Welcome back %s!\n", client.name);
+                    fwrite_client(csock, "Bienvenue %s !\n", client.name);
                     send_menu_commands(csock);
                 }
             }
         }
         else
         {
-            // name already taken by another host
-            write_client(csock, "name taken");
+            // pseudo déjà pris par une autre adresse
+            write_client(csock, "nom déjà pris");
         }
     }
     else
     {
-        // add a new client
+        // ajoute un nouveau client
         create_client(clients, actual, csock, max, rdfs, client_ip, name);
         // fwrite_client(csock, "-%s-%lu", client_ip, strlen(client_ip));
     }
@@ -554,13 +554,13 @@ static void reconnect_client_in_game(Game *games, int game_idx, SOCKET sock)
 {
     char buffer[BUF_SIZE];
     bool challenger_was_disconnected = games[game_idx].client_challenger.status == OFFLINE;
-    // copies the right client name into the buffer
+    // copie le bon nom de client dans le buffer
     challenger_was_disconnected ? strcpy(buffer, games[game_idx].client_challenger.name) : strcpy(buffer, games[game_idx].client_challenged.name);
-    strncat(buffer, " has reconnected.", BUF_SIZE - strlen(buffer) - 1);
-    // notifies the opponent and observators that the client has reconnected
+    strncat(buffer, " s'est reconnecté.", BUF_SIZE - strlen(buffer) - 1);
+    // notifie l'adversaire et les observateurs que le client s'est reconnecté
     challenger_was_disconnected ? write_client(games[game_idx].client_challenged.sock, buffer) : write_client(games[game_idx].client_challenger.sock, buffer);
-    send_to_all_observators(games[game_idx], buffer); // notifies observators
-    // Since we do not use pointers in our structs, we have to update each copy of our client...
+    send_to_all_observators(games[game_idx], buffer); // notifie les observateurs
+    // Comme nous n'utilisons pas de pointeurs dans nos structs, nous devons mettre à jour chaque copie du client...
     if (challenger_was_disconnected)
     {
         games[game_idx].client_challenger.sock = sock;
@@ -577,7 +577,7 @@ static void reconnect_client_in_game(Game *games, int game_idx, SOCKET sock)
 }
 
 // #########################################################
-//  						Communications
+//  						COMMUNICATIONS
 // #########################################################
 
 static int read_client(SOCKET sock, char *buffer)
@@ -587,7 +587,7 @@ static int read_client(SOCKET sock, char *buffer)
     if ((n = recv(sock, buffer, BUF_SIZE - 1, 0)) < 0)
     {
         perror("recv()");
-        /* if recv error we disonnect the client */
+        /* si erreur recv on déconnecte le client */
         n = 0;
     }
 
@@ -634,7 +634,7 @@ static void send_message_to_all_clients(Client *clients, Client sender,
     message[0] = 0;
     for (i = 0; i < actual; i++)
     {
-        /* we don't send message to the sender */
+        /* on n'envoie pas le message à l'expéditeur */
         if (sender.sock != clients[i].sock && clients[i].status != OFFLINE)
         {
             if (from_server == 0)
@@ -653,8 +653,8 @@ static void send_connected_names(Client *connected_clients, SOCKET sock, int act
     char buffer[BUF_SIZE] = "\0";
     if (actual <= 1)
     {
-        // Doesn't work...
-        strncpy(buffer, "You're the only one here...", BUF_SIZE - 1);
+        // Pas d'autres utilisateurs
+        strncpy(buffer, "Vous êtes le seul ici...", BUF_SIZE - 1);
     }
     else
     {
@@ -666,16 +666,16 @@ static void send_connected_names(Client *connected_clients, SOCKET sock, int act
             switch (c.status)
             {
             case ONLINE:
-                strcpy(status, "ONLINE");
+                strcpy(status, "EN_LIGNE");
                 break;
             case OFFLINE:
-                strcpy(status, "OFFLINE");
+                strcpy(status, "HORS_LIGNE");
                 break;
             case OBSERVING:
-                strcpy(status, "OBSERVING");
+                strcpy(status, "OBSERVATION");
                 break;
             case IN_GAME:
-                strcpy(status, "IN_GAME");
+                strcpy(status, "EN_JEU");
                 break;
             }
 
@@ -684,7 +684,7 @@ static void send_connected_names(Client *connected_clients, SOCKET sock, int act
             strcat(buffer, info);
             if (c.sock == sock)
             {
-                strcat(buffer, " <-- you");
+                strcat(buffer, " <-- vous");
             }
             strcat(buffer, "\n");
         }
@@ -693,7 +693,7 @@ static void send_connected_names(Client *connected_clients, SOCKET sock, int act
 }
 
 // #########################################################
-//  						Data
+//  						DONNÉES
 // #########################################################
 
 static void init_client(Client *ptr, SOCKET sock, const char *ip, const char *name)
@@ -711,7 +711,7 @@ static void init_client(Client *ptr, SOCKET sock, const char *ip, const char *na
     ptr->friend_req = NULL;
 }
 
-// Returns the index of the client that has the name, -1 otherwise
+// Retourne l'index du client qui a ce nom, -1 sinon
 int name_exists(const Client *clients, int actual, const char *name)
 {
     for (int i = 0; i < actual; i++)
@@ -726,7 +726,7 @@ int name_exists(const Client *clients, int actual, const char *name)
 
 static void clear_clients(Client *clients, int actual)
 {
-    // close socket of clients and free all malloc for arrays
+    // fermer les sockets des clients et libérer les malloc pour les tableaux
 
     for (int i = 0; i < actual; i++)
     {
@@ -738,7 +738,7 @@ static void clear_clients(Client *clients, int actual)
 
 static void clear_game(Game *games, int nb_games)
 {
-    // free all malloc for arrays in game
+    // libérer les malloc pour les tableaux dans Game
     for (int i = 0; i < nb_games; i++)
     {
         free(games[i].ptr_observators);
@@ -748,7 +748,7 @@ static void clear_game(Game *games, int nb_games)
 
 static void clear_challenge(Challenge *challenges, int nb_challenges)
 {
-    // free all malloc for arrays in game
+    // libérer les malloc pour les tableaux dans Challenge
 }
 
 int main()

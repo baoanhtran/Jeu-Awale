@@ -12,17 +12,17 @@ static void app(const char *address, const char *name)
 
     fd_set rdfs;
 
-    /* send our name */
+    /* envoyer notre nom */
     write_server(sock, name);
 
     while (1)
     {
         FD_ZERO(&rdfs);
 
-        /* add STDIN_FILENO */
+        /* ajouter STDIN_FILENO */
         FD_SET(STDIN_FILENO, &rdfs);
 
-        /* add the socket */
+        /* ajouter la socket */
         FD_SET(sock, &rdfs);
 
         if (select(sock + 1, &rdfs, NULL, NULL, NULL) == -1)
@@ -31,7 +31,7 @@ static void app(const char *address, const char *name)
             exit(errno);
         }
 
-        /* something from standard input : i.e keyboard */
+        /* données depuis l'entrée standard : p.ex. le clavier */
         if (FD_ISSET(STDIN_FILENO, &rdfs))
         {
             if (fgets(buffer, BUF_SIZE - 1, stdin) == NULL)
@@ -48,14 +48,14 @@ static void app(const char *address, const char *name)
             }
             else
             {
-                /* fclean */
+                /* nettoyage */
                 buffer[BUF_SIZE - 1] = 0;
             }
 
-            // Cleans the command prompt
+            // Nettoie l'invite de commande
             if (strncmp(buffer, "clear", 5) == 0)
             {
-                system("clear"); // clear terminal
+                system("clear"); // effacer le terminal
             }
             else
             {
@@ -65,28 +65,28 @@ static void app(const char *address, const char *name)
         else if (FD_ISSET(sock, &rdfs))
         {
             int n = read_server(sock, buffer);
-            /* server down */
+            /* serveur arrêté */
             if (n == 0)
             {
-                printf("Server disconnected !\n");
+                printf("Serveur déconnecté !\n");
                 break;
             }
 
-            // This message is received if the client is already connect with the name he had sent.
-            if (strncmp(buffer, "already connected", 17) == 0)
+            // Ce message est reçu si le client est déjà connecté avec le nom qu'il a envoyé.
+            if (strncmp(buffer, "déjà connecté", strlen("déjà connecté")) == 0)
             {
-                printf("Someone with the same IP as you is already logged into this account. Make sure you don't have any command prompt logged in with this client.");
+                printf("Quelqu'un ayant la même IP que vous est déjà connecté à ce compte. Assurez-vous de ne pas avoir un autre terminal ouvert avec ce client.");
                 break;
             }
 
-            // This message is received if the client's name is already taken.
-            if (strncmp(buffer, "name taken", 10) == 0)
+            // Ce message est reçu si le nom du client est déjà utilisé.
+            if (strncmp(buffer, "nom déjà pris", strlen("nom déjà pris")) == 0)
             {
-                printf("This name is already taken by another client. Try another one.");
+                printf("Ce nom est déjà utilisé par un autre client. Essayez un autre nom.");
                 break;
             }
 
-            // NOTE : In both cases, the programs exits
+            // NOTE : Dans les deux cas, le programme se termine
 
             puts(buffer);
         }
@@ -110,7 +110,7 @@ static int init_connection(const char *address)
     hostinfo = gethostbyname(address);
     if (hostinfo == NULL)
     {
-        fprintf(stderr, "Unknown host %s.\n", address);
+        fprintf(stderr, "Hôte inconnu %s.\n", address);
         exit(EXIT_FAILURE);
     }
 
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
 {
     if (argc < 2)
     {
-        printf("Usage : %s [address] [pseudo]\n", argv[0]);
+        printf("Utilisation : %s [adresse] [pseudo]\n", argv[0]);
         return EXIT_FAILURE;
     }
 

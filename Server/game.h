@@ -5,41 +5,41 @@
 #include "client.h"
 
 #define MAX_OBSERVATORS 100
-#define MAX_DISCONNECTION 2 // Maximum number of disconnections for each player during a game
-#define MAX_ELAPSED_TIME 30 // Numbers of seconds to wait after a disconnection
+#define MAX_DISCONNECTION 2 // Nombre max de déconnexions par joueur pendant une partie
+#define MAX_ELAPSED_TIME 30 // Nombre de secondes d'attente après une déconnexion
 
 typedef enum
 {
     WIN,
     LOSE,
     DRAW
-} Game_Result; // To know the result of a game
+} Game_Result; // Pour connaître le résultat d'une partie
 
 typedef enum
 {
     PRIVATE,
     PUBLIC
-} GameVisiblity; // To allow/block observations of unknown clients
+} GameVisiblity; // Permet d'autoriser/bloquer l'observation aux clients inconnus
 
 typedef struct
 {
-    int challenger_disconnections; // How many times the challenger has disconnected ?
+    int challenger_disconnections; // Nombre de déconnexions du challenger
     int challenged_disconnections;
-    unsigned long elapsed_time; // How long the disconnected client has been disconnected ?
+    unsigned long elapsed_time; // Durée depuis la déconnexion
 } GameDisconnection;
 
 typedef enum
 {
     IN_PROGRESS,
     PAUSED,
-} GameState; // To know if a client is disconnected or not
+} GameState; // Indique si la partie est en cours ou en pause
 
 typedef struct
 {
     Client client_challenger;
     Client client_challenged;
     GameVisiblity visibility;
-    Client **ptr_observators; // liste de pointers des observators (clients)
+    Client **ptr_observators; // liste de pointeurs vers les observateurs (clients)
     int nb_observators;
     Partie *partie;
     GameDisconnection *game_disconnection;
@@ -49,17 +49,17 @@ typedef struct
 void delete_game(Game *games, int to_remove, int *nb_games);
 int has_game(Client client, const Game *games, int nb_games);
 void play(const char *cell_str, Client client, Game *games, int nb_games, Client *clients, int actual);
-void display_game(Game game); // send plateau to all players and observators
+void display_game(Game game); // envoie le plateau à tous les joueurs et observateurs
 void display_turn(Game game);
-void game_set_visiblity(Client sender, const char *visibility, Game *games, int nb_games); // set visiblity of game playing par sender
-void show_all_games(Client sender, const Game *games, int nb_games);                       // show all games are in process to the sender
+void game_set_visiblity(Client sender, const char *visibility, Game *games, int nb_games); // définit la visibilité de la partie du sender
+void show_all_games(Client sender, const Game *games, int nb_games);                       // affiche toutes les parties en cours
 void observe_game(
     Client *clients, int actual, Game *games, int nb_games,
-    int ind_sender, const char *name_player_in_game);                                               // let sender becomes the observator of game in which player_in_game is playing
-void remove_observator(Client *observator, Game *games, int nb_games);                              // remove observator from game
-void leave_observing(Client *ptr_sender, Game *games, int nb_games);                                // let sender escape observating mode
-void kick_all_observators(Game *ptr_game);                                                          // kick all observators of game
-void is_observing_game(Client *ptr_client, Game *games, int nb_games, int *ind_game, int *ind_obs); // set ind_game and ind_obs to the index of game and observator in game (-1 if not)
+    int ind_sender, const char *name_player_in_game);                                               // permet au sender de devenir observateur de la partie de name_player_in_game
+void remove_observator(Client *observator, Game *games, int nb_games);                              // retire un observateur d'une partie
+void leave_observing(Client *ptr_sender, Game *games, int nb_games);                                // permet au sender de quitter le mode observation
+void kick_all_observators(Game *ptr_game);                                                          // expulse tous les observateurs d'une partie
+void is_observing_game(Client *ptr_client, Game *games, int nb_games, int *ind_game, int *ind_obs); // définit ind_game et ind_obs (ou -1 si non)
 int is_in_game(const Game *games, int nb_games, Client client);
 void init_game_disconnection(GameDisconnection *game_disconnection);
 void refresh_paused_games(Client *clients, int actual, Game *games, int *nb_games);

@@ -14,7 +14,7 @@ const char *extract_first_word(const char *str, char *result, int max_len)
     while (*str == ' ')
     {
         str++;
-    } // Trim spaces in beginning
+    } // Supprime les espaces en début
 
     size_t i = 0;
     size_t strSize = min(strlen(str), max_len);
@@ -23,9 +23,9 @@ const char *extract_first_word(const char *str, char *result, int max_len)
     {
         result[i++] = *str++;
     }
-    result[i] = '\0'; // Null-terminate
+    result[i] = '\0'; // Termine par '\0'
 
-    return str; // Return the pointer to the rest of the string
+    return str; // Retourne le pointeur vers le reste de la chaîne
 }
 
 int min(int a, int b)
@@ -38,7 +38,7 @@ int max(int a, int b)
     return a > b ? a : b;
 }
 
-// Can handle the string "0" (unlike atoi())
+// Peut gérer la chaîne "0" (contrairement à atoi())
 int my_atoi(const char *cell_str, int *cell)
 {
     char *fin;
@@ -68,20 +68,20 @@ void trim_whitespace(char *str)
 {
     char *end;
     while (isspace((unsigned char)*str))
-        str++; // skip whitespace in the beginning
+        str++; // ignore les espaces en début
     if (*str == '\0')
         return;
     end = str + strlen(str) - 1;
     while (end > str && isspace((unsigned char)*end))
-        end--; // skip whitespace at the end
+        end--; // ignore les espaces en fin
     *(end + 1) = '\0';
 }
 
 int strcmp_ip(const char *ip1, const char *ip2)
 {
-    // check if the two ip are the same
-    // cause ip get from cmd line and ip from file are regard to be different although they are the same
-    printf("compare ip %s and %s\n", ip1, ip2);
+    // vérifie si les deux IP sont identiques
+    // car une IP récupérée depuis la ligne de commande et depuis le fichier peuvent sembler différentes
+    printf("comparaison des IP %s et %s\n", ip1, ip2);
 
     int len1 = strlen(ip1);
     int len2 = strlen(ip2);
@@ -90,7 +90,7 @@ int strcmp_ip(const char *ip1, const char *ip2)
         printf("ip1: %s (%lu), ip2: %s (%lu)\n", ip1, strlen(ip1), ip2, strlen(ip2));
         return -1;
     }
-    // compare each octet of ip
+    // compare chaque octet de l'IP
     for (int i = 0; i <= len1; i++)
     {
         if (ip1[i] != ip2[i])

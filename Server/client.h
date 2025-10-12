@@ -27,25 +27,24 @@ typedef enum
     OFFLINE,
     IN_GAME,
     OBSERVING,
-} Status; // To know what is the current state of our client
+} Status;
 
 typedef enum
 {
     PENDING,
     ACCEPTED,
     DENIED,
-    DELETED,         // sender cancel the FR
-} Friend_Req_Status; // For the friends feature
+    DELETED,         // la demande d'ami a été supprimée (par l'envoyeur)
+} Friend_Req_Status;
 
-// Forward declaration of Client
-typedef struct Client Client; // to make Friend Req can see Client
+typedef struct Client Client;
 typedef struct Friend_Req Friend_Req;
 
 struct Friend_Req
 {
     char name_client[NAME_SIZE];
     Friend_Req_Status status;
-    bool is_sender; // is the client in Friend Req is the sender of friend request
+    bool is_sender; // vrai si le client est l'envoyeur de la demande d'ami
 };
 
 struct Client
@@ -55,7 +54,7 @@ struct Client
     char ip[INET_ADDRSTRLEN];
     char name[NAME_SIZE];
     char bio[BIO_SIZE];
-    Friend_Req *friend_req; // TODO: change name to friend_reqs if possible
+    Friend_Req *friend_req;
     int nb_friend_req;
     int elo_scores;
 };

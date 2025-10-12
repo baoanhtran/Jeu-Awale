@@ -27,58 +27,58 @@ void play(const char *cell_str, Client client, Game *games, int nb_games, Client
     int game_idx = has_game(client, games, nb_games);
     if (game_idx != -1)
     {
-        // The client is in game.
+        // Le client est en partie.
         Game game = games[game_idx];
         Partie *partie = game.partie;
         bool client_is_challenger = (strcmp(game.client_challenger.name, client.name) == 0);
         bool client_is_challenged = (strcmp(game.client_challenged.name, client.name) == 0);
         bool challenger_turn = partie->tour_joueur1;
-        // If the game is not paused, both client are connected so they can play
+        // Si la partie n'est pas en pause, les deux clients sont connectés et peuvent jouer
         if (game.game_state != PAUSED)
         {
-            // Make sure it's the turn of the client who tried to play
+            // Vérifie que c'est bien le tour du client qui essaie de jouer
             if ((client_is_challenged && !challenger_turn) || (client_is_challenger && challenger_turn))
             {
                 int cell;
-                my_atoi(cell_str, &cell); // Cast string to int (note that the basic atoi() function doesn't handle the string "0" correctly)
-                // The play is valid
+                my_atoi(cell_str, &cell); // conversion string -> int
+                // Le coup est valide
                 if (verifierCoup(partie, cell))
                 {
                     effectuerTour(partie, cell);
                     display_game(game);
-                    // Is the game finished ?
+                    // La partie est-elle terminée ?
                     if (finDePartie(partie))
                     {
                         Game_Result result_of_challenger;
-                        // Draw
+                        // Match nul
                         if (partie->score_joueur1 == partie->score_joueur2)
                         {
-                            write_client(game.client_challenger.sock, "Draw.");
-                            write_client(game.client_challenged.sock, "Draw.");
+                            write_client(game.client_challenger.sock, "Match nul.");
+                            write_client(game.client_challenged.sock, "Match nul.");
                             result_of_challenger = DRAW;
                         }
                         else
                         {
-                            // Challenger wins
+                            // Challenger gagne
                             if (partie->score_joueur1 > partie->score_joueur2)
                             {
-                                write_client(game.client_challenger.sock, "You won");
-                                write_client(game.client_challenged.sock, "You lost");
-                                sprintf(buffer, "%s won", game.client_challenger.name);
+                                write_client(game.client_challenger.sock, "Vous avez gagné");
+                                write_client(game.client_challenged.sock, "Vous avez perdu");
+                                sprintf(buffer, "%s a gagné", game.client_challenger.name);
                                 send_to_all_observators(game, buffer);
                                 result_of_challenger = WIN;
                             }
                             else
                             {
-                                // Challenged client wins
-                                write_client(game.client_challenger.sock, "You lost");
-                                write_client(game.client_challenged.sock, "You won");
-                                sprintf(buffer, "%s won", game.client_challenged.name);
+                                // Challenged gagne
+                                write_client(game.client_challenger.sock, "Vous avez perdu");
+                                write_client(game.client_challenged.sock, "Vous avez gagné");
+                                sprintf(buffer, "%s a gagné", game.client_challenged.name);
                                 send_to_all_observators(game, buffer);
                                 result_of_challenger = LOSE;
                             }
                         }
-                        // Put both clients online, update the elos, send end game messages...
+                        // Remet les deux clients en ligne, met à jour les ELO, envoie les messages de fin...
                         int ind_challenger = name_exists(clients, actual, game.client_challenger.name);
                         int ind_challenged = name_exists(clients, actual, game.client_challenged.name);
                         clients[ind_challenger].status = ONLINE;
@@ -87,41 +87,41 @@ void play(const char *cell_str, Client client, Game *games, int nb_games, Client
                         free(game.game_disconnection);
                         kick_all_observators(&games[game_idx]);
 
-                        // Envoi du message fin de partie
-                        send_to_all_observators(games[game_idx], "Game finished. You left the observation mode!\n");
-                        write_client(client.sock, "End of the game. You can now continue to challenge other players.\n");
+                        // Message de fin de partie aux observateurs
+                        send_to_all_observators(games[game_idx], "Partie terminée. Vous quittez le mode observation !\n");
+                        write_client(client.sock, "Fin de la partie. Vous pouvez maintenant défier d'autres joueurs.\n");
                         delete_game(games, game_idx, &nb_games);
                     }
                     else
                     {
-                        // On notifie le prochain client que c'est à son tour de jouer
+                        // On notifie le prochain joueur que c'est à lui de jouer
                         display_turn(game);
                     }
                 }
                 else
                 {
-                    // The play isn't valid
-                    strncpy(buffer, "This cell is invalid. Retry.", BUF_SIZE - 1);
+                    // Le coup n'est pas valide
+                    strncpy(buffer, "Cette case est invalide. Réessayez.", BUF_SIZE - 1);
                     write_client(client.sock, buffer);
                 }
             }
             else
             {
-                // The client tries to play during his opponent turn.
-                strncpy(buffer, "It's your opponent turn. Wait few seconds...", BUF_SIZE - 1);
+                // Le client essaie de jouer pendant le tour de son adversaire.
+                strncpy(buffer, "C'est au tour de votre adversaire. Attendez quelques instants...", BUF_SIZE - 1);
                 write_client(client.sock, buffer);
             }
         }
         else
         {
-            // Client tries to play while the game is paused.
-            write_client(client.sock, "You cannot play while the game is paused.");
+            // Le client tente de jouer alors que la partie est en pause.
+            write_client(client.sock, "Vous ne pouvez pas jouer pendant que la partie est en pause.");
         }
     }
     else
     {
-        // The client isn't in game.
-        strncpy(buffer, "You're not currently in game.", BUF_SIZE - 1);
+        // Le client n'est pas en partie.
+        strncpy(buffer, "Vous n'êtes pas actuellement en partie.", BUF_SIZE - 1);
         write_client(client.sock, buffer);
     }
 }
@@ -139,7 +139,7 @@ int has_game(Client client, const Game *games, int nb_games)
     return -1;
 }
 
-// Send plateau to all players and observators
+// Ecrit le plateau de la partie aux deux joueurs et aux observateurs
 void display_game(Game game)
 {
 
@@ -159,39 +159,39 @@ void display_game(Game game)
     send_to_all_observators(game, buf_obs);
 }
 
-// announce the player of turn to all players and observators
+// Indique à qui est le tour de jouer
 void display_turn(Game game)
 {
     char buffer[BUF_SIZE];
     if (game.partie->tour_joueur1)
     {
-        fwrite_client(game.client_challenger.sock, "It's your turn. To play, use command 'play [6-11]'");
-        sprintf(buffer, "It's turn of %s.", game.client_challenger.name);
+        fwrite_client(game.client_challenger.sock, "C'est votre tour. Pour jouer, utilisez la commande 'play [6-11]'");
+        sprintf(buffer, "C'est le tour de %s.", game.client_challenger.name);
         fwrite_client(game.client_challenged.sock, buffer);
         send_to_all_observators(game, buffer);
     }
     else
     {
-        fwrite_client(game.client_challenged.sock, "It's your turn. To play, use command 'play [0-5]'");
-        sprintf(buffer, "It's turn of %s.", game.client_challenged.name);
+        fwrite_client(game.client_challenged.sock, "C'est votre tour. Pour jouer, utilisez la commande 'play [0-5]'");
+        sprintf(buffer, "C'est le tour de %s.", game.client_challenged.name);
         fwrite_client(game.client_challenger.sock, buffer);
         send_to_all_observators(game, buffer);
     }
 }
 
-// Sets game visiblity
+// Définit la visibilité de la partie
 void game_set_visiblity(Client sender, const char *visibility, Game *games, int nb_games)
 {
-    // set visiblity of game playing par sender
+    // définir la visibilité de la partie du sender
 
-    // check params of command
+    // vérifie les paramètres
     if (*visibility == '\0')
     {
-        fwrite_client(sender.sock, "Visibility not found! Please follow syntax: set visibility [private/public].");
+        fwrite_client(sender.sock, "Visibilité introuvable ! Syntaxe : set visibility [private/public].");
         return;
     }
 
-    // check if visibility is valid
+    // vérifie si la visibilité est valide
     GameVisiblity gv = PUBLIC;
     if (strcmp(visibility, "private") == 0)
     {
@@ -203,27 +203,27 @@ void game_set_visiblity(Client sender, const char *visibility, Game *games, int 
     }
     else
     {
-        fwrite_client(sender.sock, "%s visibility doesn't exist! Try 'private' or 'public'.", visibility);
+        fwrite_client(sender.sock, "Visibilité '%s' inconnue ! Essayez 'private' ou 'public'.", visibility);
         return;
     }
 
-    // check if sender are in a game or not
+    // vérifie si le sender est en partie
     int ind_game = has_game(sender, games, nb_games);
     if (ind_game == -1)
     {
-        fwrite_client(sender.sock, "Look like you are not in a game. Set visibility is only for game you playing.");
+        fwrite_client(sender.sock, "On dirait que vous n'êtes pas en partie. La visibilité concerne uniquement la partie en cours.");
         return;
     }
 
-    // convert enum to string
+    // convertit enum en chaîne
     char info[BUF_SIZE];
     switch (gv)
     {
     case PRIVATE:
-        strcpy(info, "private");
+        strcpy(info, "privée");
         break;
     case PUBLIC:
-        strcpy(info, "public");
+        strcpy(info, "publique");
         break;
     default:
         break;
@@ -231,14 +231,14 @@ void game_set_visiblity(Client sender, const char *visibility, Game *games, int 
 
     if (games[ind_game].visibility == gv)
     {
-        fwrite_client(sender.sock, "Game visibility is already %s.", info);
+        fwrite_client(sender.sock, "La visibilité de la partie est déjà %s.", info);
     }
     else
     {
         games[ind_game].visibility = gv;
-        fwrite_client(sender.sock, "Game visibility is set to %s.", info);
+        fwrite_client(sender.sock, "La visibilité de la partie est définie sur %s.", info);
 
-        // kick all non-friend observators if game set to PRIVATE
+        // expulse les observateurs non amis si on passe en privé
         if (gv == PRIVATE)
         {
             for (int i = 0; i < games[ind_game].nb_observators; i++)
@@ -248,11 +248,11 @@ void game_set_visiblity(Client sender, const char *visibility, Game *games, int 
                 if (is_friend_j1 == -1 && is_friend_j2 == -1)
                 {
                     char msg[BUF_SIZE];
-                    snprintf(msg, BUF_SIZE, "The game visibility has been changed to private. You are not friend of neither %s nor %s, you are now leaving the observation mode!",
+                    snprintf(msg, BUF_SIZE, "La visibilité de la partie est passée en privée. Vous n'êtes ami ni avec %s ni avec %s, vous quittez le mode observation !",
                              games[ind_game].client_challenged.name, games[ind_game].client_challenger.name);
                     write_client(games[ind_game].ptr_observators[i]->sock, msg);
                     games[ind_game].ptr_observators[i]->status = ONLINE;
-                    // remove observator from list
+                    // retire l'observateur de la liste
                     games[ind_game].ptr_observators[i] = games[ind_game].ptr_observators[games[ind_game].nb_observators - 1];
                     games[ind_game].nb_observators--;
                     i--;
@@ -270,12 +270,12 @@ void show_all_games(Client sender, const Game *games, int nb_games)
     char buffer[BUF_SIZE];
 
     sprintf(buffer, nb_games > 0
-                        ? "All games in process:\n"
-                        : "No games are in process at the moment!");
+                        ? "Toutes les parties en cours :\n"
+                        : "Aucune partie en cours pour le moment !");
     for (int i = 0; i < nb_games; i++)
     {
         char info[NAME_SIZE * 3];
-        sprintf(info, "Game %d: %s vs. %s (%s)\n", i, games[i].client_challenged.name, games[i].client_challenger.name, games[i].visibility == PRIVATE ? "private" : "public");
+        sprintf(info, "Partie %d : %s vs. %s (%s)\n", i, games[i].client_challenged.name, games[i].client_challenger.name, games[i].visibility == PRIVATE ? "privée" : "publique");
         strncpy(buffer, info, BUF_SIZE - 1);
     }
     write_client(sender.sock, buffer);
@@ -289,10 +289,10 @@ void observe_game(
     switch (clients[ind_sender].status)
     {
     case IN_GAME:
-        write_client(clients[ind_sender].sock, "You are in a game, you are not able to watching another game!");
+        write_client(clients[ind_sender].sock, "Vous êtes dans une partie, vous ne pouvez pas regarder une autre partie !");
         return;
     case OBSERVING:
-        write_client(clients[ind_sender].sock, "You are currently observing a game, please leave to watch another game!");
+        write_client(clients[ind_sender].sock, "Vous regardez déjà une partie, veuillez quitter pour en regarder une autre !");
         return;
     default:
         break;
@@ -302,7 +302,7 @@ void observe_game(
     int player_id = name_exists(clients, actual, name_player_in_game);
     if (player_id == -1)
     {
-        fwrite_client(clients[ind_sender].sock, "Player %s doesn't exist!", name_player_in_game);
+        fwrite_client(clients[ind_sender].sock, "Le joueur %s n'existe pas !", name_player_in_game);
         return;
     }
     Client player_in_game = clients[player_id];
@@ -311,7 +311,7 @@ void observe_game(
     if (game_id == -1)
     {
         fwrite_client(clients[ind_sender].sock,
-                      "It's look like %s is not in any game!",
+                      "On dirait que %s n'est dans aucune partie !",
                       player_in_game.name);
         return;
     }
@@ -325,7 +325,7 @@ void observe_game(
         if (is_friend_j1 == -1 && is_friend_j2 == -1)
         {
             fwrite_client(clients[ind_sender].sock,
-                          "You cannot observe the game because you are neither friend of %s nor %s!",
+                          "Vous ne pouvez pas observer la partie car vous n'êtes ami ni avec %s ni avec %s !",
                           g.client_challenged.name, g.client_challenger.name);
             return;
         }
@@ -345,7 +345,7 @@ void observe_game(
     if (g.nb_observators == MAX_OBSERVATORS)
     {
         fwrite_client(clients[ind_sender].sock,
-                      "The number of observators has reached the limits!");
+                      "Le nombre d'observateurs a atteint la limite !");
         return;
     }
 
@@ -380,14 +380,14 @@ void leave_observing(Client *ptr_sender, Game *games, int nb_games)
     switch (ptr_sender->status)
     {
     case IN_GAME:
-        write_client(ptr_sender->sock, "You are in a game, this is only for leaving an observation!");
+        write_client(ptr_sender->sock, "Vous êtes dans une partie, ceci est uniquement pour quitter une observation !");
         return;
     case OBSERVING:
         remove_observator(ptr_sender, games, nb_games);
-        write_client(ptr_sender->sock, "You have left the observation!");
+        write_client(ptr_sender->sock, "Vous avez quitté l'observation !");
         return;
     default:
-        write_client(ptr_sender->sock, "You are not observing any game!");
+        write_client(ptr_sender->sock, "Vous n'observez aucune partie !");
         break;
     }
     ptr_sender->status = ONLINE;
@@ -399,7 +399,7 @@ void kick_all_observators(Game *ptr_game)
 
     for (int i = 0; i < ptr_game->nb_observators; i++)
     {
-        write_client(ptr_game->ptr_observators[i]->sock, "The game is finished. You are now leaving the observation mode!");
+        write_client(ptr_game->ptr_observators[i]->sock, "La partie est terminée. Vous quittez maintenant le mode d'observation !");
         ptr_game->ptr_observators[i]->status = ONLINE;
     }
     free(ptr_game->ptr_observators);
@@ -468,15 +468,15 @@ static void end_paused_game(Client *clients, int actual, int ind_challenger, int
 {
     if (games[game_idx].client_challenged.status == OFFLINE)
     {
-        write_client(games[game_idx].client_challenger.sock, "Your opponent has taken too much time to reconnect. You win.\n");
+        write_client(games[game_idx].client_challenger.sock, "Votre adversaire met trop de temps à se reconnecter. Vous gagnez.\n");
         clients[ind_challenger].status = ONLINE;
     }
     else
     {
-        write_client(games[game_idx].client_challenged.sock, "Your opponent has taken too much time to reconnect. You win.\n");
+        write_client(games[game_idx].client_challenged.sock, "Votre adversaire met trop de temps à se reconnecter. Vous gagnez.\n");
         clients[ind_challenged].status = ONLINE;
     }
-    send_to_all_observators(games[game_idx], "The player took too much time to reconnect.\n");
+    send_to_all_observators(games[game_idx], "Le joueur a mis trop de temps à se reconnecter.\n");
     kick_all_observators(&games[game_idx]);
     updateElo(&clients[ind_challenger], &clients[ind_challenged], WIN, K_COEF);
     delete_game(games, game_idx, nb_games);

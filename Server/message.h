@@ -4,21 +4,21 @@
 #include "challenge.h"
 #include "server.h"
 
-// base messages
-void send_menu_commands(SOCKET sock); // show all commands of game to a client
+// messages de base
+void send_menu_commands(SOCKET sock); // affiche toutes les commandes disponibles au client
 
-// challenge messages
+// messages de défi
 void send_challenge_message(Client challenger, Client challenged);
 void send_received_challenge(Challenge challenge);
 void send_challenge_accepted_message(Challenge challenge);
 void send_challenge_denied_message(Challenge challenge);
 
-// game messages
-void send_to_all_observators(Game game, const char *buffer); // Send msg in buffer to all observators in game
+// messages de jeu
+void send_to_all_observators(Game game, const char *buffer); // envoie buffer à tous les observateurs d'une partie
 
-// friends messages
-void send_msg_friend_request(Client sender, Client requested);      // Send content of friend request to sender and client
-void send_list_friend_request(Client sender);                       // send list of friend request to sender
-void send_list_friend(Client sender, Client clients[], int actual); // send list of friend of sender to sender
+// messages d'amis
+void send_msg_friend_request(Client sender, Client requested);      // envoie le contenu d'une demande d'ami au sender et au client
+void send_list_friend_request(Client sender);                       // envoie la liste des demandes d'ami au sender
+void send_list_friend(Client sender, Client clients[], int actual); // envoie la liste d'amis du sender
 
 #endif // !MESSAGE

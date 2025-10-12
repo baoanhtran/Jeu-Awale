@@ -51,13 +51,13 @@ $ hostname -I
 ```
 Puis lancez le serveur :
 ```bash
-$ ./server
+$ ./awale_server
 ```
 
 ### 4️⃣ Lancer le client
 Sur une autre machine ou un autre terminal, exécutez :
 ```bash
-$ ./client ip-serveur pseudo
+$ ./awale_client ip-serveur pseudo
 ```
 
 Remplacez `ip-serveur` par l’adresse IP obtenue à l’étape précédente, et `pseudo` par votre nom de joueur.
