@@ -220,10 +220,10 @@ void game_set_visiblity(Client sender, const char *visibility, Game *games, int 
     switch (gv)
     {
     case PRIVATE:
-        strcpy(info, "PRIVATE");
+        strcpy(info, "private");
         break;
     case PUBLIC:
-        strcpy(info, "PUBLIC");
+        strcpy(info, "public");
         break;
     default:
         break;
@@ -231,12 +231,34 @@ void game_set_visiblity(Client sender, const char *visibility, Game *games, int 
 
     if (games[ind_game].visibility == gv)
     {
-        fwrite_client(sender.sock, "Game visibility is already  %s.", info);
+        fwrite_client(sender.sock, "Game visibility is already %s.", info);
     }
     else
     {
         games[ind_game].visibility = gv;
         fwrite_client(sender.sock, "Game visibility is set to %s.", info);
+
+        // kick all non-friend observators if game set to PRIVATE
+        if (gv == PRIVATE)
+        {
+            for (int i = 0; i < games[ind_game].nb_observators; i++)
+            {
+                int is_friend_j1 = is_friend(*(games[ind_game].ptr_observators[i]), games[ind_game].client_challenged.name);
+                int is_friend_j2 = is_friend(*(games[ind_game].ptr_observators[i]), games[ind_game].client_challenger.name);
+                if (is_friend_j1 == -1 && is_friend_j2 == -1)
+                {
+                    char msg[BUF_SIZE];
+                    snprintf(msg, BUF_SIZE, "The game visibility has been changed to private. You are not friend of neither %s nor %s, you are now leaving the observation mode!",
+                             games[ind_game].client_challenged.name, games[ind_game].client_challenger.name);
+                    write_client(games[ind_game].ptr_observators[i]->sock, msg);
+                    games[ind_game].ptr_observators[i]->status = ONLINE;
+                    // remove observator from list
+                    games[ind_game].ptr_observators[i] = games[ind_game].ptr_observators[games[ind_game].nb_observators - 1];
+                    games[ind_game].nb_observators--;
+                    i--;
+                }
+            }
+        }
     }
 }
 
@@ -253,7 +275,7 @@ void show_all_games(Client sender, const Game *games, int nb_games)
     for (int i = 0; i < nb_games; i++)
     {
         char info[NAME_SIZE * 3];
-        sprintf(info, "Game %d: %s vs. %s \n", i, games[i].client_challenged.name, games[i].client_challenger.name);
+        sprintf(info, "Game %d: %s vs. %s (%s)\n", i, games[i].client_challenged.name, games[i].client_challenger.name, games[i].visibility == PRIVATE ? "private" : "public");
         strncpy(buffer, info, BUF_SIZE - 1);
     }
     write_client(sender.sock, buffer);
