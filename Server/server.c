@@ -661,7 +661,7 @@ static void send_connected_names(Client *connected_clients, SOCKET sock, int act
         for (int i = 0; i < actual; i++)
         {
             Client c = connected_clients[i];
-            char status[10];
+            char status[12];
 
             switch (c.status)
             {
