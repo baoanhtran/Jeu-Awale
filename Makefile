@@ -1,11 +1,5 @@
-# Définir le nom des exécutables selon l'OS
-ifeq ($(shell uname), Darwin)
-	CLIENT_EXE = client.pas
-	SERVER_EXE = server.pas
-else
-    CLIENT_EXE = awale_client
-	SERVER_EXE = awale_server
-endif
+CLIENT_EXE = awale_client
+SERVER_EXE = awale_server
 
 OBJS = challenge.o game.o game_logic.o message.o utils.o user_interaction.o ranking.o persistence.o
 
