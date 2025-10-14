@@ -20,7 +20,6 @@ typedef struct
 void getPlateau(char *buffer, Partie *partie, int view, const char *name_player_1, const char *name_player_2);
 void afficherPlateau(Partie *partie);
 Partie *creerPartie();
-void detruirePartie(Partie *partie);
 bool finDePartie(Partie *partie);
 bool verifierCoup(Partie *partie, int case_jouee);
 void effectuerTour(Partie *partie, int case_jouee);

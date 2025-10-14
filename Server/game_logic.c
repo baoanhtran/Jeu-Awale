@@ -357,6 +357,3 @@ Partie *chargerPartie(const char *nom_fichier)
 
     return partie_chargee;
 }
-
-// Frees a Partie
-void detruirePartie(Partie *partie) { free(partie); }

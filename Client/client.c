@@ -75,14 +75,14 @@ static void app(const char *address, const char *name)
             // Ce message est reçu si le client est déjà connecté avec le nom qu'il a envoyé.
             if (strncmp(buffer, "déjà connecté", strlen("déjà connecté")) == 0)
             {
-                printf("Quelqu'un ayant la même IP que vous est déjà connecté à ce compte. Assurez-vous de ne pas avoir un autre terminal ouvert avec ce client.");
+                printf("Quelqu'un ayant la même IP que vous est déjà connecté à ce compte. Assurez-vous de ne pas avoir un autre terminal ouvert avec ce client.\n");
                 break;
             }
 
             // Ce message est reçu si le nom du client est déjà utilisé.
             if (strncmp(buffer, "nom déjà pris", strlen("nom déjà pris")) == 0)
             {
-                printf("Ce nom est déjà utilisé par un autre client. Essayez un autre nom.");
+                printf("Ce nom est déjà utilisé par un autre client. Essayez un autre nom.\n");
                 break;
             }
 
