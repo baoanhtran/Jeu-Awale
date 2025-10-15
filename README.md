@@ -2,7 +2,7 @@
 
 ## 🧭 Aperçu
 
-Ce projet est une implémentation simple du jeu **Awalé** en **interface en ligne de commande (CLI)**, développée dans le cadre du cours *Programmation Réseau (Internet Programming)* par **TRAN Bao Anh**, en langage **C**.
+Ce projet est une implémentation simple du jeu **Awalé** en **interface en ligne de commande (CLI)**, développée dans le cadre du cours *Programmation Réseau (Internet Programming)* par **TRAN Bao Anh** et **HUDE Dimitri**, en langage **C**.
 
 Le jeu permet à plusieurs joueurs de se connecter et d’interagir via un modèle client-serveur.  
 Il inclut des fonctionnalités telles que les **défis**, la **visibilité des parties**, un **système de discussion privée** et la **gestion des amis**.
@@ -60,7 +60,7 @@ Sur une autre machine ou un autre terminal, exécutez :
 $ ./awale_client ip-serveur pseudo
 ```
 
-Remplacez `ip-serveur` par l’adresse IP obtenue à l’étape précédente, et `pseudo` par votre nom de joueur.
+Remplacez `ip-serveur` par l’adresse IP obtenue à l’étape précédente (ou par localhost en cas de lancement local), et `pseudo` par votre nom de joueur.
 
 ---
 
